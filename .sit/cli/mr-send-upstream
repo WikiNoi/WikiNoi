@@ -1,0 +1,6 @@
+branch=$(git rev-parse --abbrev-ref HEAD)
+echo
+echo You can now send this MR to the inbox:
+echo
+echo git send-email --to=wikinoi@inbox.wikinoi.com ${branch}..$1
+
