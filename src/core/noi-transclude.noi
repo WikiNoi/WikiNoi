@@ -1,0 +1,29 @@
+<noi-wiki id="noi/core/noi-transclude" title="noi-transclude custom element" content-type="text/x.html-source">
+  <script>
+    class NoiTransclude extends HTMLElement {
+      constructor() {
+        super();
+        this.html = hyperHTML.bind(this);
+      }
+      connectedCallback() {
+        const wiki = document.getElementById(this.getAttribute("wiki"));
+        if (wiki === null) {
+          return;
+        }
+        const attr = this.getAttribute("attribute") ?
+          wiki.getAttribute(this.getAttribute("attribute")) :
+          null;
+        const contentType = this.getAttribute("attribute") ?
+          "text/plain" :
+          wiki.getAttribute(this.getAttribute("content-type"));
+
+        const parsed = { html: document.noi.contentType[contentType](attr || wiki.innerHTML) };
+        this.html`${parsed}`;
+      }
+    }
+
+    document.addEventListener('noi-render-ready', function () {
+      customElements.define('noi-transclude', NoiTransclude);
+    })
+  </script>
+</noi-wiki>

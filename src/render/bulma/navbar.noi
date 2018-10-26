@@ -1,0 +1,85 @@
+<noi-wiki id="noi/render/bulma/navbar" content-type="text/x.html-source">
+  <script>
+    class BulmaNavbar extends HTMLElement {
+      constructor() {
+        super();
+        this.html = hyperHTML.bind(this);
+        this.wikiFilter = "";
+      }
+      connectedCallback() {
+        this.render();
+      }
+      toggleBurger() {
+        this.querySelector(".navbar-burger").classList.toggle("is-active");
+        this.querySelector(".navbar-menu").classList.toggle("is-active");
+      }
+      toggleWikis() {
+        this.querySelector("#wikis").classList.toggle("is-active");
+      }
+      closeWikis() {
+        this.querySelector("#wikis").classList.remove("is-active");
+        this.querySelector(".navbar-burger").classList.remove("is-active");
+        this.querySelector(".navbar-menu").classList.remove("is-active");
+
+        return false;
+      }
+
+      changeWikiFilter(e) {
+        this.wikiQuery = `[id*="${e.target.value}"]`;
+        this.wikiFilter = e.target.value;
+        this.render();
+      }
+
+      new() {
+        document.noi.wiki("noname").show();
+        this.querySelector(".navbar-burger").classList.remove("is-active");
+        this.querySelector(".navbar-menu").classList.remove("is-active");
+
+      }
+
+      render() {
+        this.html`
+<nav class="navbar is-fixed-bottom is-light" aria-label="tools">
+
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu" onclick=${this.toggleBurger.bind(this)}>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+ <div id="navbarMenu" class="navbar-menu">
+  <div class="navbar-start">
+    <div class="navbar-item">
+      <div class="buttons">
+        <a class="button is-primary" onclick=${this.new.bind(this)}>New</a>
+      </div>
+    </div>
+  </div>
+  <div class="navbar-end">
+        <div id="wikis" class="navbar-item has-dropdown has-dropdown-up">
+          <div class="navbar-link" onclick=${this.toggleWikis.bind(this)}>
+            Wikis
+          </div>
+          <div class="navbar-dropdown is-right" style="overflow-y: auto; max-height: 50vh">
+           <div class="navbar-item">
+             <input class="input is-rounded" type="text" oninput=${this.changeWikiFilter.bind(this)} value=${this.wikiFilter}>
+           </div>
+            ${Array.prototype.map.call(document.noi.wikis(this.wikiQuery),
+            w => hyperHTML`<a class="navbar-item" href="${'#' + w.id}" is="noi-link" onclick=${this.closeWikis.bind(this)}>${w.id}</a>`)}
+          </div>
+        </div>
+  </div>
+  </div>
+
+</nav>
+                `;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      customElements.define('noi-bulma-navbar', BulmaNavbar);
+    });
+
+  </script>
+</noi-wiki>

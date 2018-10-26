@@ -1,0 +1,3 @@
+Currently, many custom elements use hyperHTML (which is great) but they lack some uniformity and simplicity.
+
+Proposed solution: use https://github.com/WebReflection/hyperHTML-Element

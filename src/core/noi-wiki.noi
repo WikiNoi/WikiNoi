@@ -1,0 +1,92 @@
+<noi-wiki id="noi/core/noi-wiki" title="noi-wiki custom element" content-type="text/x.html-source">
+  <script>
+    class NoiWiki extends HTMLElement {
+      constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.observer = new MutationObserver((e) => {
+          this.render();
+        });
+      }
+      connectedCallback() {
+        this.shouldRender = this.hasAttribute("data-rendered");
+        this.observer.observe(this, {
+          attributes: true,
+          childList: true,
+          subtree: false
+        });
+        this.render();
+      }
+      disconnectedCallback() {
+        this.observer.disconnect();
+      }
+      static get observedAttributes() {
+        return ['data-rendered'];
+      }
+      attributeChangedCallback(name, old, val) {
+        if (name === 'data-rendered') {
+          this.shouldRender = (typeof val === 'string');
+          this.render();
+        }
+      }
+      render(shadow) {
+        if (this.shouldRender) {
+          var text = document.createElement(document.noi.wiki('noi/config').getAttribute('view'));
+          for (var i in this.attributes) {
+            var attr = this.attributes.item(i);
+            text.setAttribute(attr.nodeName, attr.nodeValue);
+          }
+          text.innerHTML = this.innerHTML;
+          if ((shadow || this.shadowRoot).firstChild != null) {
+            (shadow || this.shadowRoot).replaceChild(text, (shadow || this.shadowRoot).firstChild);
+          } else {
+            (shadow || this.shadowRoot).appendChild(text);
+          }
+        } else {
+          (shadow || this.shadowRoot).innerHTML = "";
+        }
+      }
+      toggle() {
+        document.dispatchEvent(new CustomEvent('noi-toggle', { detail: { element: this } }))
+      }
+      show() {
+        document.dispatchEvent(new CustomEvent('noi-show', { detail: { element: this } }))
+      }
+      hide() {
+        document.dispatchEvent(new CustomEvent('noi-hide', { detail: { element: this } }))
+      }
+
+    }
+    document.noi = document.noi || {}
+
+    document.noi.wiki = (id) => {
+      var el = document.getElementById(id);
+      if (el == null) {
+        el = document.createElement('noi-wiki');
+        el.setAttribute("id", id);
+        el.setAttribute("editing", true);
+      }
+      return el;
+
+    }
+    document.noi.wikis = (query) => {
+      return document.querySelectorAll(`noi-wiki${query || ""}`);
+    }
+
+    document.addEventListener('noi-render-ready', function () {
+      customElements.define('noi-wiki', NoiWiki);
+      function loadWikis() {
+        if (document.location.hash == "") {
+          document.noi.wiki('default').show();
+        } else {
+          document.location.hash.split("#").slice(1).map(decodeURIComponent).forEach((name) => document.noi.wiki(name).show());
+        }
+      }
+      loadWikis();
+      window.onhashchange = () => {
+        document.noi.wikis().forEach((w) => w.hide());
+        loadWikis();
+      }
+    });
+  </script>
+</noi-wiki>

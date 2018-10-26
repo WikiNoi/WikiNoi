@@ -1,0 +1,54 @@
+<noi-wiki id="noi/libraries/markdown-it/plugins/noi-transclude" content-type="text/x.html-source">
+  <script>
+    window.markdownItNoiTransclude = (md) => {
+      md.inline.ruler.push('noi-transclude', (state, silent) => {
+        var found, content, token, max = state.posMax, start = state.pos;
+        if (start + 4 >= max) { return false; }
+        if (silent) { return false; } // don't run any pairs in validation mode
+        if (state.src.charCodeAt(start) !== 0x7B && /* { */
+          state.src.charCodeAt(start + 1) !== 0x7B) { return false; }
+
+        state.pos = start + 2;
+
+        while (state.pos < max) {
+          if (state.src.charCodeAt(state.pos) === 0x7D && /* } */
+            state.src.charCodeAt(state.pos + 1) === 0x7D) {
+            found = true;
+            break;
+          }
+
+          state.pos++;
+        }
+
+        if (!found || start + 2 === state.pos) {
+          state.pos = start;
+          return false;
+        }
+
+        content = state.src.slice(start + 2, state.pos);
+        var [name, attr] = content.split('#');
+
+        // found!
+        state.posMax = state.pos;
+        state.pos = start + 2;
+
+        token = state.push('noi_transclude_open', 'noi-transclude', 1);
+        token.markup = '{{';
+        token.attrSet("wiki", name);
+        if (typeof attr === 'string') {
+          token.attrSet("attribute", attr);
+        }
+
+        token = state.push('noi_transclude_open', 'noi-transclude', -1);
+        token.markup = '}}';
+
+
+        state.pos = state.posMax + 2;
+        state.posMax = max;
+
+        return true;
+
+      });
+    }
+  </script>
+</noi-wiki>

@@ -1,0 +1,65 @@
+<noi-wiki id="noi/render/content" content-type="text/x.html-source">
+  <script>
+    var contentType = {}
+
+    const markdown = markdownit()
+      .use(markdownItAttrs)
+      .use(markdownitSub)
+      .use(markdownitSup)
+      .use(markdownItNoiLink)
+      .use(markdownItNoiTransclude)
+      .use(markdownItNoiWidget)
+      .use(markdownItNoiVar);
+
+    contentType["text/html"] = node => {
+      if (typeof node == 'string') {
+        return node;
+      }
+      if (node instanceof Node) {
+        return node.innerHTML;
+      }
+      throw `${node} is neither a string nor a Node`;
+    }
+
+    contentType["text/markdown"] = node => {
+      if (typeof node == 'string') {
+        return markdown.render(node);
+      }
+      if (node instanceof Node) {
+        const template = node.querySelector('template');
+        if (template == null) {
+          return markdown.render(node.innerHTML);
+        } else {
+          return markdown.render(template.innerHTML);
+        }
+      }
+      throw `${node} is neither a string nor a Node`;
+    };
+
+    contentType["text/x.html-source"] = node => {
+      const escapeHtml = function escapeHtml(unsafe) {
+        return unsafe
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      if (typeof node == 'string') {
+        return `<pre><code>${escapeHtml(node)}</code></pre>`
+      }
+      if (node instanceof Node) {
+        return `<pre><code>${escapeHtml(node.innerHTML)}</code></pre>`
+      }
+      throw `${node} is neither a string nor a Node`;
+    }
+
+    document.noi = document.noi || {};
+    document.noi.contentType = new Proxy(contentType, {
+      get(target, name) {
+        return target.hasOwnProperty(name) ? target[name] : target["text/markdown"]
+      }
+    });
+  </script>
+</noi-wiki>

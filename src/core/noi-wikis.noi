@@ -1,0 +1,19 @@
+<noi-wiki id="noi/core/noi-wikis" title="noi-wikis custom element" content-type="text/x.html-source">
+  <script>
+    class NoiWikis extends HTMLElement {
+      constructor() {
+        super();
+        this.html = hyperHTML.bind(this);
+      }
+      connectedCallback() {
+        this.html`${Array.prototype.map.call(document.noi.wikis(this.getAttribute("query")),
+          w => hyperHTML`<noi-var name="wiki" value=${w.id}>${{ html: this.innerHTML }}</noi-var>`)}`;
+      }
+
+    }
+
+    document.addEventListener('noi-render-ready', function () {
+      customElements.define('noi-wikis', NoiWikis);
+    })
+  </script>
+</noi-wiki>

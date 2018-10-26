@@ -1,0 +1,16 @@
+<noi-wiki id="noi/core/noi-link" title="noi-link custom element" content-type="text/x.html-source">
+  <script>
+    class NoiLink extends HTMLAnchorElement {
+      connectedCallback() {
+        this.onclick = (e) => {
+          document.noi.wiki(this.getAttribute("href").slice(1)).show();
+          return this.hasAttribute("propagate");
+        }
+      }
+    }
+
+    document.addEventListener('noi-render-ready', function () {
+      customElements.define('noi-link', NoiLink, { extends: "a" });
+    })
+  </script>
+</noi-wiki>

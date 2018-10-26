@@ -1,0 +1,11 @@
+<noi-wiki id="noi/core/style">
+        <style>
+                .is-visible>noi-wiki {
+                        display: block;
+                }
+
+                noi-wiki {
+                        display: none;
+                }
+        </style>
+</noi-wiki>

@@ -1,0 +1,69 @@
+<noi-wiki id="noi/libraries/markdown-it/plugins/noi-widget" content-type="text/x.html-source">
+  <script>
+    window.markdownItNoiWidget = (md) => {
+      md.inline.ruler.push('noi-widget', (state, silent) => {
+        var found, content, token, max = state.posMax, start = state.pos;
+        if (start + 4 >= max) { return false; }
+        if (silent) { return false; } // don't run any pairs in validation mode
+        if (state.src.charCodeAt(start) !== 0x5b && /* [ */
+          state.src.charCodeAt(start + 1) !== 0x7b /* { */) { return false; }
+
+        state.pos = start + 2;
+
+        while (state.pos < max) {
+          if (state.src.charCodeAt(state.pos) === 0x7d && /* } */
+            state.src.charCodeAt(state.pos + 1) === 0x5d /* ] */) {
+            found = true;
+            break;
+          }
+
+          state.pos++;
+        }
+
+        if (!found || start + 2 === state.pos) {
+          state.pos = start;
+          return false;
+        }
+
+        content = state.src.slice(start + 2, state.pos);
+
+        // found!
+        state.posMax = state.pos;
+        state.pos = start + 2;
+
+        const closing = content.startsWith("/");
+        const selfClosing = content.endsWith("/");
+        const opening = !closing && !selfClosing
+
+        const name = "noi-" + content.split(" ")[0].replace("/", "");
+
+        if (selfClosing) {
+          token = state.push('noi_widget_open', name, 1);
+          token.markup = '[{';
+        }
+
+        if (opening) {
+          token = state.push('noi_widget_open', name, 1);
+          token.markup = '[{';
+        }
+
+        for (var pair of content.replace(/^\//, "").replace(/\/$/, "")
+          .split(" ").slice(1)) {
+          const [name, val] = pair.split("=");
+          token.attrSet(name, val.replace(/^"/, "").replace(/"$/, ""));
+        }
+
+        if (closing || selfClosing) {
+          token = state.push('noi_widget_close', name, -1);
+          token.markup = '/}]';
+        }
+
+        state.pos = state.posMax + 2;
+        state.posMax = max;
+
+        return true;
+
+      });
+    }
+  </script>
+</noi-wiki>
