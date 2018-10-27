@@ -1,0 +1,8 @@
+This is a very important operation for a wiki that is edited locally.
+While it's imperfect (saving a file over and over is not very
+practical), it's the the first way to get the updated information saved.
+
+Solution: add `document.noi.getHTMLBlob()` function to construct export HTML
+
+Also, expose it through the navbar in Bulma renderer
+

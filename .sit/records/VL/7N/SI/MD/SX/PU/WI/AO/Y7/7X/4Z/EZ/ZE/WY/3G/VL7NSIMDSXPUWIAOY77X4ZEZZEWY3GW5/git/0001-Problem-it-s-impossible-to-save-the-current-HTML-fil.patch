@@ -1,0 +1,101 @@
+From 03e28df4ae2f43c2fa92d26ff0389a9cbd6890e6 Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Sat, 27 Oct 2018 13:08:14 -0700
+Subject: [PATCH] Problem: it's impossible to save the current HTML file
+
+This is a very important operation for a wiki that is edited locally.
+While it's imperfect (saving a file over and over is not very
+practical), it's the the first way to get the updated information saved.
+
+Solution: add `document.noi.getHTMLBlob()` function to construct export HTML
+
+Also, expose it through the navbar in Bulma renderer
+---
+ src/core/noi-wiki.noi       | 53 ++++++++++++++++++++++++++++++++++++-
+ src/render/bulma/navbar.noi |  1 +
+ 2 files changed, 53 insertions(+), 1 deletion(-)
+
+diff --git a/src/core/noi-wiki.noi b/src/core/noi-wiki.noi
+index ed6a05e..559e7c4 100644
+--- a/src/core/noi-wiki.noi
++++ b/src/core/noi-wiki.noi
+@@ -73,6 +73,57 @@
+       return document.querySelectorAll(`noi-wiki${query || ""}`);
+     }
+ 
++    document.noi.getHTMLBlob = () => {
++      const header = `
++   <!DOCTYPE html>
++    <html>
++      <head>
++        <meta charset="utf-8">
++        <meta name="viewport" content="width=device-width, initial-scale=1">
++     </head>
++     <body>`;
++     const footer = `
++     </body>
++    </html>
++      `;
++      const content = Array.prototype.map.call(document.noi.wikis(),
++                      w => {
++                       const w_ = document.importNode(w, true);
++                       for (var attr of w_.attributes) {
++                         if (attr.nodeName === "class") {
++                             w_.removeAttribute(attr.nodeName);
++                         }
++                       }
++                       for (var data in w_.dataset) {
++                         delete w_.dataset[data];
++                       }
++                       return w_.outerHTML;
++                      });
++      content.unshift(header);
++      content.push(footer);
++      return new Blob(content, {type: "text/html"});
++    }
++
++    (function() {
++    var previousObjectURL = null;
++    document.noi.saveHTML = () => {
++      if (previousObjectURL !== null) {
++        URL.revokeObjectURL(previousObjectURL);
++      }
++      let url = URL.createObjectURL(document.noi.getHTMLBlob());
++      var name = window.location.pathname.split("/").slice(-1)[0];
++      if (!name.endsWith(".html")) {
++        name = "index.html";
++      }
++      let link = document.createElement('a');
++      link.setAttribute("download", name);
++      link.setAttribute("href", url);
++      document.body.appendChild(link);
++      link.click();
++      document.body.removeChild(link);
++    }}).call(this);
++
++
+     document.addEventListener('noi-render-ready', function () {
+       customElements.define('noi-wiki', NoiWiki);
+       function loadWikis() {
+@@ -89,4 +140,4 @@
+       }
+     });
+   </script>
+-</noi-wiki>
+\ No newline at end of file
++</noi-wiki>
+diff --git a/src/render/bulma/navbar.noi b/src/render/bulma/navbar.noi
+index 9f562b2..d1ae99d 100644
+--- a/src/render/bulma/navbar.noi
++++ b/src/render/bulma/navbar.noi
+@@ -54,6 +54,7 @@
+     <div class="navbar-item">
+       <div class="buttons">
+         <a class="button is-primary" onclick=${this.new.bind(this)}>New</a>
++        <a class="button" onclick=${document.noi.saveHTML}>Save</a>
+       </div>
+     </div>
+   </div>
+-- 
+2.18.1
+
