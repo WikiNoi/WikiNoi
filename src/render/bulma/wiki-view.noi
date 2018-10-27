@@ -1,11 +1,11 @@
 <noi-wiki id="noi/render/bulma/wiki-view" content-type="text/x.html-source">
   <script>
-    class BulmaWikiView extends HTMLElement {
+  (function() {
+    let view = (stylesheet) => class extends HTMLElement {
       constructor() {
         super();
         this.html = hyperHTML.bind(this);
-        this.stylesheet = document.getElementById('noi/render/bulma/style.css').querySelector('style').cloneNode(true);
-        this.icons = document.getElementById('noi/libraries/typicons').querySelector('style').cloneNode(true);
+        this.stylesheet = stylesheet;
       }
       connectedCallback() {
         this.editing = this.hasAttribute("editing") ? this.getAttribute("editing") : false;
@@ -34,8 +34,7 @@
         const text = this.editing ? hyperHTML`<textarea class="textarea" id="new-content">${this.originalHTML}</textarea><div class="level"><div class="level-right"><div class="level-item"><input type="submit" class="button" value="Save" onclick=${this.save.bind(this)}></div></div></div>` : { html: document.noi.contentType[this.getAttribute('content-type')](this.originalHTML) };
         const title_html = this.editing ? hyperHTML`<input id="new-id" type="text" value=${this.id} class="input">` : (this.getAttribute("title") || this.id);
         this.html`
-                        ${this.icons}
-                        ${this.stylesheet}
+                        <link href=${this.stylesheet} rel="stylesheet">
                         <div class="level is-mobile">
                         <div class="level-left">
                         <div class="level-item">
@@ -62,7 +61,12 @@
       }
     }
     document.addEventListener('DOMContentLoaded', function () {
-      customElements.define('noi-bulma-wiki-view', BulmaWikiView);
+      let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('style').innerHTML;
+      let icons = document.noi.wiki('noi/libraries/typicons').querySelector('style').innerHTML;
+      let blob = new Blob([style, icons], {type: "text/css"});
+      let url = URL.createObjectURL(blob);
+      customElements.define('noi-bulma-wiki-view', view(url));
     });
+   }).apply(this);
   </script>
 </noi-wiki>
