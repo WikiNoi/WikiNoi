@@ -54,6 +54,7 @@
     <div class="navbar-item">
       <div class="buttons">
         <a class="button is-primary" onclick=${this.new.bind(this)}>New</a>
+        <a class="button" onclick=${document.noi.saveHTML}>Save</a>
       </div>
     </div>
   </div>
