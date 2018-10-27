@@ -1,0 +1,69 @@
+From 0840b66dc990b13f1a5c65fb58a24409bfc9184d Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Sat, 27 Oct 2018 13:23:31 -0700
+Subject: [PATCH] Problem: importing styles into a shadow root is wasteful
+
+Currently, every time we render a wiki, because it's in a shadow root
+(so there's a boundary that our stylesheets can't pierece), we import
+the styles from their original nodes and re-insert it as elements to be
+rendered and used in the template. This is extremely wasteful,
+especially when it comes to heavier stylesheets.
+
+Solution: use "object URLs" to include the stylesheets
+(https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL)
+
+This technique allows us to reference a stylesheet that is inside of the
+same document as if it was in a separate one. This gives us the ability
+to use the `link` tag to include the stylesheets.
+---
+ src/render/bulma/wiki-view.noi | 18 +++++++++++-------
+ 1 file changed, 11 insertions(+), 7 deletions(-)
+
+diff --git a/src/render/bulma/wiki-view.noi b/src/render/bulma/wiki-view.noi
+index 39cab23..758ac64 100644
+--- a/src/render/bulma/wiki-view.noi
++++ b/src/render/bulma/wiki-view.noi
+@@ -1,11 +1,11 @@
+ <noi-wiki id="noi/render/bulma/wiki-view" content-type="text/x.html-source">
+   <script>
+-    class BulmaWikiView extends HTMLElement {
++  (function() {
++    let view = (stylesheet) => class extends HTMLElement {
+       constructor() {
+         super();
+         this.html = hyperHTML.bind(this);
+-        this.stylesheet = document.getElementById('noi/render/bulma/style.css').querySelector('style').cloneNode(true);
+-        this.icons = document.getElementById('noi/libraries/typicons').querySelector('style').cloneNode(true);
++        this.stylesheet = stylesheet;
+       }
+       connectedCallback() {
+         this.editing = this.hasAttribute("editing") ? this.getAttribute("editing") : false;
+@@ -34,8 +34,7 @@
+         const text = this.editing ? hyperHTML`<textarea class="textarea" id="new-content">${this.originalHTML}</textarea><div class="level"><div class="level-right"><div class="level-item"><input type="submit" class="button" value="Save" onclick=${this.save.bind(this)}></div></div></div>` : { html: document.noi.contentType[this.getAttribute('content-type')](this.originalHTML) };
+         const title_html = this.editing ? hyperHTML`<input id="new-id" type="text" value=${this.id} class="input">` : (this.getAttribute("title") || this.id);
+         this.html`
+-                        ${this.icons}
+-                        ${this.stylesheet}
++                        <link href=${this.stylesheet} rel="stylesheet">
+                         <div class="level is-mobile">
+                         <div class="level-left">
+                         <div class="level-item">
+@@ -62,7 +61,12 @@
+       }
+     }
+     document.addEventListener('DOMContentLoaded', function () {
+-      customElements.define('noi-bulma-wiki-view', BulmaWikiView);
++      let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('style').innerHTML;
++      let icons = document.noi.wiki('noi/libraries/typicons').querySelector('style').innerHTML;
++      let blob = new Blob([style, icons], {type: "text/css"});
++      let url = URL.createObjectURL(blob);
++      customElements.define('noi-bulma-wiki-view', view(url));
+     });
++   }).apply(this);
+   </script>
+-</noi-wiki>
+\ No newline at end of file
++</noi-wiki>
+-- 
+2.18.1
+

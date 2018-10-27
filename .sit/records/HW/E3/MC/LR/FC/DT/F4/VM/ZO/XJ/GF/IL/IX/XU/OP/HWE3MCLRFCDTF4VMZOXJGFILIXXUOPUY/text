@@ -1,0 +1,13 @@
+Currently, every time we render a wiki, because it's in a shadow root
+(so there's a boundary that our stylesheets can't pierece), we import
+the styles from their original nodes and re-insert it as elements to be
+rendered and used in the template. This is extremely wasteful,
+especially when it comes to heavier stylesheets.
+
+Solution: use "object URLs" to include the stylesheets
+(https://developer.mozilla.org/en-US/docs/Web/API/URL/createObjectURL)
+
+This technique allows us to reference a stylesheet that is inside of the
+same document as if it was in a separate one. This gives us the ability
+to use the `link` tag to include the stylesheets.
+
