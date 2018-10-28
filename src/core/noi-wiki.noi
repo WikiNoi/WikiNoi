@@ -64,7 +64,7 @@
       if (el == null) {
         el = document.createElement('noi-wiki');
         el.setAttribute("id", id);
-        el.setAttribute("editing", true);
+        el.setAttribute("data-editing", true);
       }
       return el;
 

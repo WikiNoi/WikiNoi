@@ -8,7 +8,7 @@
         this.stylesheet = stylesheet;
       }
       connectedCallback() {
-        this.editing = this.hasAttribute("editing") ? this.getAttribute("editing") : false;
+        this.editing = this.hasAttribute("data-editing") ? this.getAttribute("data-editing") : false;
         this.classList.add('box');
         this.originalHTML = this.innerHTML.replace(/^\n/, '').replace(/\n$/, '');
         this.render();
@@ -23,9 +23,9 @@
       save() {
         this.editing = false;
         const wiki = document.noi.wiki(this.id);
-        wiki.removeAttribute("editing");
+        wiki.removeAttribute("data-editing");
         wiki.id = this.querySelector("#new-id").value;
-        this.removeAttribute("editing");
+        this.removeAttribute("data-editing");
         this.originalHTML = this.querySelector("#new-content").value;
         wiki.innerHTML = this.originalHTML;
         this.render();
