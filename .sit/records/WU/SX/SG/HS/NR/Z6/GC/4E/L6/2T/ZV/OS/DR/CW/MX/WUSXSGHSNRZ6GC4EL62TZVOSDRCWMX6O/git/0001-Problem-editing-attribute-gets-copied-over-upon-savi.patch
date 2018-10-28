@@ -1,0 +1,56 @@
+From 280dbb58af8c2e4bfda3dcf089f84a84ce93ac61 Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Sat, 27 Oct 2018 22:51:37 -0700
+Subject: [PATCH] Problem: `editing` attribute gets copied over upon saving
+
+However, this is not an intended behaviour since `editing` is a sort of
+an internal attribute.
+
+Solution: change it to `data-editing` as datasets are not copied over
+to HTML blobs.
+---
+ src/core/noi-wiki.noi          | 2 +-
+ src/render/bulma/wiki-view.noi | 6 +++---
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/core/noi-wiki.noi b/src/core/noi-wiki.noi
+index 559e7c4..2e806b8 100644
+--- a/src/core/noi-wiki.noi
++++ b/src/core/noi-wiki.noi
+@@ -64,7 +64,7 @@
+       if (el == null) {
+         el = document.createElement('noi-wiki');
+         el.setAttribute("id", id);
+-        el.setAttribute("editing", true);
++        el.setAttribute("data-editing", true);
+       }
+       return el;
+ 
+diff --git a/src/render/bulma/wiki-view.noi b/src/render/bulma/wiki-view.noi
+index 758ac64..df9a2f6 100644
+--- a/src/render/bulma/wiki-view.noi
++++ b/src/render/bulma/wiki-view.noi
+@@ -8,7 +8,7 @@
+         this.stylesheet = stylesheet;
+       }
+       connectedCallback() {
+-        this.editing = this.hasAttribute("editing") ? this.getAttribute("editing") : false;
++        this.editing = this.hasAttribute("data-editing") ? this.getAttribute("data-editing") : false;
+         this.classList.add('box');
+         this.originalHTML = this.innerHTML.replace(/^\n/, '').replace(/\n$/, '');
+         this.render();
+@@ -23,9 +23,9 @@
+       save() {
+         this.editing = false;
+         const wiki = document.noi.wiki(this.id);
+-        wiki.removeAttribute("editing");
++        wiki.removeAttribute("data-editing");
+         wiki.id = this.querySelector("#new-id").value;
+-        this.removeAttribute("editing");
++        this.removeAttribute("data-editing");
+         this.originalHTML = this.querySelector("#new-content").value;
+         wiki.innerHTML = this.originalHTML;
+         this.render();
+-- 
+2.18.1
+

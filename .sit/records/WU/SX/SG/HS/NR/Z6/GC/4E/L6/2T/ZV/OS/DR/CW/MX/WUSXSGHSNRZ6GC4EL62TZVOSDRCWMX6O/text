@@ -1,0 +1,6 @@
+However, this is not an intended behaviour since `editing` is a sort of
+an internal attribute.
+
+Solution: change it to `data-editing` as datasets are not copied over
+to HTML blobs.
+
