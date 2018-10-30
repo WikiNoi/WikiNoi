@@ -1,0 +1,6 @@
+noi-wiki component wants to know when it's details were changed and it's
+using a mutation observer for that. However, this is a bit heavy-handed.
+
+Solution: create a singular document mutation observer
+that emits its own even specifically when a wiki is updated.
+
