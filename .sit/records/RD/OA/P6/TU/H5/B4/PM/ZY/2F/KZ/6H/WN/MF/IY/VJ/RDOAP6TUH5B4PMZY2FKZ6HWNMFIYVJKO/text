@@ -1,0 +1,7 @@
+Current rendering mechanism has a minor, but annoying problem -- every
+time a wiki is rendered, a FOUC (Flash Of Unstyled Content) happens.
+This is because the style is applied only after it's loaded.
+
+Solution: by default, render wikis with `display: none` style
+but override it with `!important` inside of the wiki's own view styling.
+

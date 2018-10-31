@@ -1,0 +1,44 @@
+From 8f0b738a814400ef48b63efae6acd8369dd70b17 Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Tue, 30 Oct 2018 22:31:39 -0700
+Subject: [PATCH] Problem: FOUC when rendering a wiki
+
+Current rendering mechanism has a minor, but annoying problem -- every
+time a wiki is rendered, a FOUC (Flash Of Unstyled Content) happens.
+This is because the style is applied only after it's loaded.
+
+Solution: by default, render wikis with `display: none` style
+but override it with `!important` inside of the wiki's own view styling.
+---
+ src/core/noi-wiki.noi          | 1 +
+ src/render/bulma/wiki-view.noi | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/core/noi-wiki.noi b/src/core/noi-wiki.noi
+index 43baa90..3a1639d 100644
+--- a/src/core/noi-wiki.noi
++++ b/src/core/noi-wiki.noi
+@@ -30,6 +30,7 @@
+             var attr = this.attributes.item(i);
+             text.setAttribute(attr.nodeName, attr.nodeValue);
+           }
++          text.setAttribute('style', 'display: none;');
+           text.innerHTML = this.innerHTML;
+           if ((shadow || this.shadowRoot).firstChild != null) {
+             (shadow || this.shadowRoot).replaceChild(text, (shadow || this.shadowRoot).firstChild);
+diff --git a/src/render/bulma/wiki-view.noi b/src/render/bulma/wiki-view.noi
+index df9a2f6..b12d4a0 100644
+--- a/src/render/bulma/wiki-view.noi
++++ b/src/render/bulma/wiki-view.noi
+@@ -63,7 +63,7 @@
+     document.addEventListener('DOMContentLoaded', function () {
+       let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('style').innerHTML;
+       let icons = document.noi.wiki('noi/libraries/typicons').querySelector('style').innerHTML;
+-      let blob = new Blob([style, icons], {type: "text/css"});
++      let blob = new Blob(["noi-bulma-wiki-view { display: block !important }", style, icons], {type: "text/css"});
+       let url = URL.createObjectURL(blob);
+       customElements.define('noi-bulma-wiki-view', view(url));
+     });
+-- 
+2.18.1
+
