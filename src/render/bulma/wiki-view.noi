@@ -63,7 +63,7 @@
     document.addEventListener('DOMContentLoaded', function () {
       let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('style').innerHTML;
       let icons = document.noi.wiki('noi/libraries/typicons').querySelector('style').innerHTML;
-      let blob = new Blob([style, icons], {type: "text/css"});
+      let blob = new Blob(["noi-bulma-wiki-view { display: block !important }", style, icons], {type: "text/css"});
       let url = URL.createObjectURL(blob);
       customElements.define('noi-bulma-wiki-view', view(url));
     });
