@@ -30,6 +30,7 @@
             var attr = this.attributes.item(i);
             text.setAttribute(attr.nodeName, attr.nodeValue);
           }
+          text.setAttribute('style', 'display: none;');
           text.innerHTML = this.innerHTML;
           if ((shadow || this.shadowRoot).firstChild != null) {
             (shadow || this.shadowRoot).replaceChild(text, (shadow || this.shadowRoot).firstChild);
