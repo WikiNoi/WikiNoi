@@ -1,0 +1,53 @@
+<noi-wiki id="noi/libraries/markdown-it/plugins/noi-link" content-type="text/x.html-source">
+  <script>
+    window.markdownItNoiLink = (md) => {
+      md.inline.ruler.push('noi-link', (state, silent) => {
+        var found; var content; var token; var max = state.posMax; var start = state.pos
+        if (start + 4 >= max) { return false }
+        if (silent) { return false } // don't run any pairs in validation mode
+        if (state.src.charCodeAt(start) !== 0x5B && /* [ */
+          state.src.charCodeAt(start + 1) !== 0x5B) { return false }
+
+        state.pos = start + 2
+
+        while (state.pos < max) {
+          if (state.src.charCodeAt(state.pos) === 0x5D && /* ] */
+            state.src.charCodeAt(state.pos + 1) === 0x5D) {
+            found = true
+            break
+          }
+
+          state.md.inline.skipToken(state)
+        }
+
+        if (!found || start + 2 === state.pos) {
+          state.pos = start
+          return false
+        }
+
+        content = state.src.slice(start + 2, state.pos)
+        var [name, link] = content.split('|')
+
+        // found!
+        state.posMax = state.pos
+        state.pos = start + 2
+
+        token = state.push('noi_link_open', 'a', 1)
+        token.markup = '[['
+        token.attrSet('href', '#' + (link || name))
+        token.attrSet('is', 'noi-link')
+
+        token = state.push('text', '', 0)
+        token.content = name || link
+
+        token = state.push('noi_link_close', 'a', -1)
+        token.markup = ']]'
+
+        state.pos = state.posMax + 2
+        state.posMax = max
+
+        return true
+      })
+    }
+  </script>
+</noi-wiki>

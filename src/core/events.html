@@ -1,0 +1,26 @@
+<noi-wiki id="noi/core/events" content-type="text/x.html-source">
+  <script>
+    document.addEventListener('noi-render-ready', () => {
+      new MutationObserver((mutations) => {
+        var updates = {}
+        for (var mutation of mutations) {
+          if (mutation.target.tagName.toLowerCase() === 'noi-wiki') {
+            if (mutation.type === 'childList') {
+              updates[mutation.target.id] = Object.assign(updates[mutation.target.id] || {}, {
+                wiki: mutation.target
+              })
+            }
+            if (mutation.type === 'attributes' && mutation.attributeName !== 'class' && !mutation.attributeName.startsWith('data-')) {
+              updates[mutation.target.id] = Object.assign(updates[mutation.target.id] || {}, {
+                wiki: mutation.target
+              })
+            }
+          }
+        }
+        for (var update in updates) {
+          document.dispatchEvent(new CustomEvent('noi-wiki-updated', { detail: updates[update] }))
+        }
+      }).observe(document.body, { childList: true, attributes: true, subtree: true })
+    })
+  </script>
+</noi-wiki>
