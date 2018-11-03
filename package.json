@@ -5,8 +5,21 @@
   "main": "index.js",
   "scripts": {
     "build": "node index.js",
+    "standard-noi": "./node_modules/.bin/standard --env browser --plugin html 'src/**/*.html'",
+    "fix-standard-noi": "./node_modules/.bin/standard --env browser --fix --plugin html 'src/**/*.html'",
+    "standard": "./node_modules/.bin/standard",
+    "fix-standard": "./node_modules/.bin/standard --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "eslint-plugin-html": "^4.0.6",
+    "standard": "^12.0.1"
+  },
+  "standard": {
+          "globals": [
+                  "hyperHTML"
+          ]
+  }
 }

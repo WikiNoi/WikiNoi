@@ -1,0 +1,49 @@
+<noi-wiki id="noi/libraries/markdown-it/plugins/noi-var" content-type="text/x.html-source">
+  <script>
+    window.markdownItNoiVar = (md) => {
+      md.inline.ruler.push('noi-var', (state, silent) => {
+        var found; var content; var token; var max = state.posMax; var start = state.pos
+        if (start + 4 >= max) { return false }
+        if (silent) { return false } // don't run any pairs in validation mode
+        if (state.src.charCodeAt(start) !== 0x7B && /* { */
+          state.src.charCodeAt(start + 1) !== 0x25 /* % */) { return false }
+
+        state.pos = start + 2
+
+        while (state.pos < max) {
+          if (state.src.charCodeAt(state.pos) === 0x25 && /* % */
+            state.src.charCodeAt(state.pos + 1) === 0x7D /* } */) {
+            found = true
+            break
+          }
+
+          state.pos++
+        }
+
+        if (!found || start + 2 === state.pos) {
+          state.pos = start
+          return false
+        }
+
+        content = state.src.slice(start + 2, state.pos)
+        var name = content.trim()
+
+        // found!
+        state.posMax = state.pos
+        state.pos = start + 2
+
+        token = state.push('noi_var_open', 'noi-var', 1)
+        token.markup = '{%'
+        token.attrSet('name', name)
+
+        token = state.push('noi_var_open', 'noi-var', -1)
+        token.markup = '%}'
+
+        state.pos = state.posMax + 2
+        state.posMax = max
+
+        return true
+      })
+    }
+  </script>
+</noi-wiki>

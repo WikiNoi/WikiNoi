@@ -1,0 +1,37 @@
+<noi-wiki id="noi/core/noi-var" title="noi-var custom element" content-type="text/x.html-source">
+  <script>
+    class NoiVar extends HTMLElement {
+      constructor () {
+        super()
+        this.vars = {}
+        this.html = hyperHTML.bind(this)
+      }
+      connectedCallback () {
+        if (this.hasAttribute('name') && this.hasAttribute('value')) {
+          this.vars[this.getAttribute('name')] = this.getAttribute('value') || this.innerHTML
+        } else if (this.hasAttribute('name')) {
+          this.html`${this.get(this.getAttribute('name'))}`
+        }
+      }
+
+      get (name) {
+        if (this.vars.hasOwnProperty(name)) {
+          return this.vars[name] || ''
+        } else {
+          var e = this.parentElement
+          while (e !== null) {
+            if (e instanceof NoiVar) {
+              return e.get(name)
+            }
+            e = this.parentElement
+          }
+          return ''
+        }
+      }
+    }
+
+    document.addEventListener('noi-render-ready', function () {
+      customElements.define('noi-var', NoiVar)
+})
+  </script>
+</noi-wiki>
