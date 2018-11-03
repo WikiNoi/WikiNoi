@@ -1,0 +1,10 @@
+Solution: use StandardJS (standardjs.com)
+
+As a part of this transition, .noi files are being renamed to .html so
+that eslint properly understands them. This has an added benefit of
+automatic syntax support for these files (because they are, in fact,
+HTMLs).
+
+Also, third-party code has been moved to `vendor` and is not subject to
+StandardJS guidelines
+
