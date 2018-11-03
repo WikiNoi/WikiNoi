@@ -25,9 +25,9 @@
         const wiki = document.noi.wiki(this.id);
         wiki.removeAttribute("data-editing");
         wiki.id = this.querySelector("#new-id").value;
+        wiki.innerHTML = this.querySelector("#new-content").value;
         this.removeAttribute("data-editing");
-        this.originalHTML = this.querySelector("#new-content").value;
-        wiki.innerHTML = this.originalHTML;
+        this.originalHTML = wiki.innerHTML;
         this.render();
       }
       render() {
