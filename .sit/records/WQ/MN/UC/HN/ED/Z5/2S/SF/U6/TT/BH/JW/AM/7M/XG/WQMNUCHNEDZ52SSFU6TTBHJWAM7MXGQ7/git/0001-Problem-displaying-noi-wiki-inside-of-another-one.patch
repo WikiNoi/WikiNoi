@@ -1,0 +1,124 @@
+From af5b58a63485269987d8403e4e78e902fe1dd604 Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Sat, 3 Nov 2018 13:10:23 -0700
+Subject: [PATCH] Problem: displaying noi-wiki inside of another one
+
+Consider we have this (contrived) example:
+
+```html
+<noi-wiki id="1" content-type="text/html">
+  This is 1
+  <noi-wiki id="2">
+  # Title
+  </noi-wiki>
+</noi-wiki>
+```
+
+Unfortunately, as it stands right now, it will be rendered as this
+(schematically):
+
+```
+ +-[1]-------[e][x]-+
+ | This is 1        |
+ +------------------+
+```
+
+However, it clearly should include the second wiki, something like this:
+
+```
+ +-[1]--------[e][x]-+
+ | This is 1         |
+ | +-[2]----[e][x]-+ |
+ | | TITLE         + |
+ | +---------------+ |
+ +-------------------+
+```
+
+Solution: ensure rendering is enabled for sub-wikis
+by scanning the parent nodes (piercing the Shadow DOM when necessary)
+for their `data-rendered` attribute (instead of looking at the own
+attribute only).
+
+Also, this requires updating the listener that triggers re-renders to do
+the same kind of scanning to see if the update is relevant.
+---
+ src/core/noi-wiki.noi          | 30 +++++++++++++++++++++++++-----
+ src/render/bulma/wiki-view.noi |  4 ++--
+ 2 files changed, 27 insertions(+), 7 deletions(-)
+
+diff --git a/src/core/noi-wiki.noi b/src/core/noi-wiki.noi
+index 3a1639d..ccc1aba 100644
+--- a/src/core/noi-wiki.noi
++++ b/src/core/noi-wiki.noi
+@@ -4,14 +4,21 @@
+       constructor() {
+         super();
+         document.addEventListener('noi-wiki-updated', (e) => {
+-          if (e.detail.wiki == this) {
+-            this.render();
++          var wiki = e.detail.wiki;
++          while (wiki !== null) {
++            // pierce shadow root
++            if (wiki instanceof ShadowRoot) {
++               wiki = wiki.host;
++            }
++            if (wiki == this) {
++               this.render();
++            }
++            wiki = wiki.parentNode;
+           }
+         });
+         this.attachShadow({ mode: 'open' });
+       }
+       connectedCallback() {
+-        this.shouldRender = this.hasAttribute("data-rendered");
+         this.render();
+       }
+       static get observedAttributes() {
+@@ -19,12 +26,25 @@
+       }
+       attributeChangedCallback(name, old, val) {
+         if (name === 'data-rendered') {
+-          this.shouldRender = (typeof val === 'string');
+           this.render();
+         }
+       }
++      shouldRender() {
++        var target = this;
++        while (target !== null) {
++           // pierce shadow root
++           if (target instanceof ShadowRoot) {
++              target = target.host;
++           }
++           if (target instanceof NoiWiki && target.hasAttribute('data-rendered')) {
++             return true;
++           }
++           target = target.parentNode;
++        }
++        return false;
++      }
+       render(shadow) {
+-        if (this.shouldRender) {
++        if (this.shouldRender()) {
+           var text = document.createElement(document.noi.wiki('noi/config').getAttribute('view'));
+           for (var i in this.attributes) {
+             var attr = this.attributes.item(i);
+diff --git a/src/render/bulma/wiki-view.noi b/src/render/bulma/wiki-view.noi
+index b12d4a0..50b7904 100644
+--- a/src/render/bulma/wiki-view.noi
++++ b/src/render/bulma/wiki-view.noi
+@@ -25,9 +25,9 @@
+         const wiki = document.noi.wiki(this.id);
+         wiki.removeAttribute("data-editing");
+         wiki.id = this.querySelector("#new-id").value;
++        wiki.innerHTML = this.querySelector("#new-content").value;
+         this.removeAttribute("data-editing");
+-        this.originalHTML = this.querySelector("#new-content").value;
+-        wiki.innerHTML = this.originalHTML;
++        this.originalHTML = wiki.innerHTML;
+         this.render();
+       }
+       render() {
+-- 
+2.18.1
+

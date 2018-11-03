@@ -1,0 +1,39 @@
+Consider we have this (contrived) example:
+
+```html
+<noi-wiki id="1" content-type="text/html">
+  This is 1
+  <noi-wiki id="2">
+  # Title
+  </noi-wiki>
+</noi-wiki>
+```
+
+Unfortunately, as it stands right now, it will be rendered as this
+(schematically):
+
+```
+ +-[1]-------[e][x]-+
+ | This is 1        |
+ +------------------+
+```
+
+However, it clearly should include the second wiki, something like this:
+
+```
+ +-[1]--------[e][x]-+
+ | This is 1         |
+ | +-[2]----[e][x]-+ |
+ | | TITLE         + |
+ | +---------------+ |
+ +-------------------+
+```
+
+Solution: ensure rendering is enabled for sub-wikis
+by scanning the parent nodes (piercing the Shadow DOM when necessary)
+for their `data-rendered` attribute (instead of looking at the own
+attribute only).
+
+Also, this requires updating the listener that triggers re-renders to do
+the same kind of scanning to see if the update is relevant.
+
