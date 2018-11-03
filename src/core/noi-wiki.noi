@@ -4,14 +4,21 @@
       constructor() {
         super();
         document.addEventListener('noi-wiki-updated', (e) => {
-          if (e.detail.wiki == this) {
-            this.render();
+          var wiki = e.detail.wiki;
+          while (wiki !== null) {
+            // pierce shadow root
+            if (wiki instanceof ShadowRoot) {
+               wiki = wiki.host;
+            }
+            if (wiki == this) {
+               this.render();
+            }
+            wiki = wiki.parentNode;
           }
         });
         this.attachShadow({ mode: 'open' });
       }
       connectedCallback() {
-        this.shouldRender = this.hasAttribute("data-rendered");
         this.render();
       }
       static get observedAttributes() {
@@ -19,12 +26,25 @@
       }
       attributeChangedCallback(name, old, val) {
         if (name === 'data-rendered') {
-          this.shouldRender = (typeof val === 'string');
           this.render();
         }
       }
+      shouldRender() {
+        var target = this;
+        while (target !== null) {
+           // pierce shadow root
+           if (target instanceof ShadowRoot) {
+              target = target.host;
+           }
+           if (target instanceof NoiWiki && target.hasAttribute('data-rendered')) {
+             return true;
+           }
+           target = target.parentNode;
+        }
+        return false;
+      }
       render(shadow) {
-        if (this.shouldRender) {
+        if (this.shouldRender()) {
           var text = document.createElement(document.noi.wiki('noi/config').getAttribute('view'));
           for (var i in this.attributes) {
             var attr = this.attributes.item(i);
