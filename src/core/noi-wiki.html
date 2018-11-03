@@ -3,6 +3,7 @@
     class NoiWiki extends HTMLElement {
       constructor () {
         super()
+        this.target = this
         document.addEventListener('noi-wiki-updated', (e) => {
           var wiki = e.detail.wiki
           while (wiki !== null) {
@@ -10,7 +11,7 @@
             if (wiki instanceof ShadowRoot) {
               wiki = wiki.host
             }
-            if (wiki === this) {
+            if (wiki === this.target) {
               this.render()
             }
             wiki = wiki.parentNode
@@ -19,6 +20,12 @@
         this.attachShadow({ mode: 'open' })
       }
       connectedCallback () {
+        if (this.hasAttribute('id') && this.hasAttribute('src')) {
+          throw new Error('noi-wiki must have either id or src attribute, but not both')
+        }
+        this.target = this.hasAttribute('src')
+          ? document.noi.wiki(this.getAttribute('src').split('#').splice(1)[0])
+          : this
         this.render()
       }
       static get observedAttributes () {
@@ -46,12 +53,12 @@
       render (shadow) {
         if (this.shouldRender()) {
           var text = document.createElement(document.noi.wiki('noi/config').getAttribute('view'))
-          for (var i in this.attributes) {
-            var attr = this.attributes.item(i)
+          for (var i in this.target.attributes) {
+            var attr = this.target.attributes.item(i)
             text.setAttribute(attr.nodeName, attr.nodeValue)
           }
           text.setAttribute('style', 'display: none;')
-          text.innerHTML = this.innerHTML
+          text.innerHTML = this.target.innerHTML
           if ((shadow || this.shadowRoot).firstChild != null) {
             (shadow || this.shadowRoot).replaceChild(text, (shadow || this.shadowRoot).firstChild)
           } else {
