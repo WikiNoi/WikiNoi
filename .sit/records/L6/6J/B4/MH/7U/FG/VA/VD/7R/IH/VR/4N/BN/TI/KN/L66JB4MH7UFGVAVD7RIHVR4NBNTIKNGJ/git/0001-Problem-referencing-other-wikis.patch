@@ -1,0 +1,82 @@
+From bfe1f71ae4f9bae28e7881722738a956fa600e60 Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Sat, 3 Nov 2018 14:33:08 -0700
+Subject: [PATCH] Problem: referencing other wikis
+
+Sometimes it might be necessary to refer to wikis defined elsewhere. The
+original motivation for this need was to be able to package plugins
+without putting all data inside of one element, but there's definitely a
+greater utility to this.
+
+Solution: add `src` attribute to `noi-wiki`
+
+For example,
+
+```html
+<noi-wiki src="#default">
+</noi-wiki>
+```
+
+would refer to a locally hosted `default` wiki.
+
+Although there's no support for remote wikis, this is something of a
+particular interest and will probably be implemented down the road.
+There are some challenges associated with this, for example, handling
+remote wikis having their own links, transclusions, and so on.
+---
+ src/core/noi-wiki.html | 15 +++++++++++----
+ 1 file changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/src/core/noi-wiki.html b/src/core/noi-wiki.html
+index 83fea70..8e58c43 100644
+--- a/src/core/noi-wiki.html
++++ b/src/core/noi-wiki.html
+@@ -3,6 +3,7 @@
+     class NoiWiki extends HTMLElement {
+       constructor () {
+         super()
++        this.target = this
+         document.addEventListener('noi-wiki-updated', (e) => {
+           var wiki = e.detail.wiki
+           while (wiki !== null) {
+@@ -10,7 +11,7 @@
+             if (wiki instanceof ShadowRoot) {
+               wiki = wiki.host
+             }
+-            if (wiki === this) {
++            if (wiki === this.target) {
+               this.render()
+             }
+             wiki = wiki.parentNode
+@@ -19,6 +20,12 @@
+         this.attachShadow({ mode: 'open' })
+       }
+       connectedCallback () {
++        if (this.hasAttribute('id') && this.hasAttribute('src')) {
++          throw new Error('noi-wiki must have either id or src attribute, but not both')
++        }
++        this.target = this.hasAttribute('src')
++          ? document.noi.wiki(this.getAttribute('src').split('#').splice(1)[0])
++          : this
+         this.render()
+       }
+       static get observedAttributes () {
+@@ -46,12 +53,12 @@
+       render (shadow) {
+         if (this.shouldRender()) {
+           var text = document.createElement(document.noi.wiki('noi/config').getAttribute('view'))
+-          for (var i in this.attributes) {
+-            var attr = this.attributes.item(i)
++          for (var i in this.target.attributes) {
++            var attr = this.target.attributes.item(i)
+             text.setAttribute(attr.nodeName, attr.nodeValue)
+           }
+           text.setAttribute('style', 'display: none;')
+-          text.innerHTML = this.innerHTML
++          text.innerHTML = this.target.innerHTML
+           if ((shadow || this.shadowRoot).firstChild != null) {
+             (shadow || this.shadowRoot).replaceChild(text, (shadow || this.shadowRoot).firstChild)
+           } else {
+-- 
+2.18.1
+

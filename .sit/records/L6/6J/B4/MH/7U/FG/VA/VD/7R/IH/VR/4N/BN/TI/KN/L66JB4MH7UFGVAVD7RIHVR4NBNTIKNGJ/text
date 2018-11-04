@@ -1,0 +1,21 @@
+Sometimes it might be necessary to refer to wikis defined elsewhere. The
+original motivation for this need was to be able to package plugins
+without putting all data inside of one element, but there's definitely a
+greater utility to this.
+
+Solution: add `src` attribute to `noi-wiki`
+
+For example,
+
+```html
+<noi-wiki src="#default">
+</noi-wiki>
+```
+
+would refer to a locally hosted `default` wiki.
+
+Although there's no support for remote wikis, this is something of a
+particular interest and will probably be implemented down the road.
+There are some challenges associated with this, for example, handling
+remote wikis having their own links, transclusions, and so on.
+
