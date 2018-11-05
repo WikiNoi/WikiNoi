@@ -1,0 +1,4 @@
+Solution: move instantiation code to noi-instantiate's constructor
+so that it's not repeated every time the element is [re-]attached to the
+DOM.
+

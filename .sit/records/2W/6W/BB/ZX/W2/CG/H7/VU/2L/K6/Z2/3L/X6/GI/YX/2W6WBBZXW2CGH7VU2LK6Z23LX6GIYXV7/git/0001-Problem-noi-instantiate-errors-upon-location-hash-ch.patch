@@ -1,0 +1,29 @@
+From 0f8717e7383cff9d3ccb1847065423874e40d89d Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Mon, 5 Nov 2018 00:59:13 -0800
+Subject: [PATCH] Problem: noi-instantiate errors upon location hash change
+
+Solution: move instantiation code to noi-instantiate's constructor
+so that it's not repeated every time the element is [re-]attached to the
+DOM.
+---
+ src/core/noi-instantiate.html | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/core/noi-instantiate.html b/src/core/noi-instantiate.html
+index 63ebca8..34c9c52 100644
+--- a/src/core/noi-instantiate.html
++++ b/src/core/noi-instantiate.html
+@@ -2,7 +2,8 @@
+   <noi-wiki id="noi/core/noi-instantiate/source" title="noi-instantiate source code" content-type="text/x.html-source">
+   <script>
+     class NoiInstantiate extends HTMLElement {
+-      connectedCallback () {
++      constructor () {
++        super()
+         const wiki = document.noi.wiki(this.getAttribute('src').slice(1))
+         this._instantiate(wiki)
+       }
+-- 
+2.18.1
+
