@@ -7,11 +7,11 @@
   A plugin is said to be Instantiatable if it has a `template` element inside:
 
   ```html
-  <noi-wiki id="plugin-name" plugin>
-    <template>
+  &lt;noi-wiki id="plugin-name" plugin&gt;
+    &lt;template&gt;
       ...
-    </template>
-  </noi-wiki>
+    &lt;/template&gt;
+  &lt;/noi-wiki&gt;
   ```
 
   The motivation behind this is to bring valid markup into the document without interpreting
@@ -20,7 +20,7 @@
   Plugin's template may also contain sub-wikis (defined in their entirety or by reference ^[1]^) that `noi-instantiate`
   will recursively instantiate.
   
-  ^[1]^: `<noi-wiki src="#..."></noi-wiki>`
+  ^[1]^: `&lt;noi-wiki src="#..."&gt;&lt;/noi-wiki&gt;`
 
   ## Non-instantiable plugins
 

@@ -25,18 +25,22 @@
     }
 
     contentType['text/markdown'] = node => {
+      var str
       if (typeof node === 'string') {
-        return markdown.render(node)
+        str = node
       }
       if (node instanceof Node) {
         const template = node.querySelector('template')
         if (template == null) {
-          return markdown.render(node.innerHTML)
+          str = node.textContent
         } else {
-          return markdown.render(template.innerHTML)
+          str = node.content.textContent
         }
       }
-      throw new Error(`${node} is neither a string nor a Node`)
+      if (typeof str !== 'string') {
+        throw new Error(`${node} is neither a string nor a Node`)
+      }
+      return markdown.render(str.replace(/&lt;/g, '<').replace(/&gt;/g, '>'))
     }
 
     contentType['text/x.html-source'] = node => {
