@@ -1,0 +1,78 @@
+From 641c6b628b2748ae25a12123ff462a965a5c406f Mon Sep 17 00:00:00 2001
+From: Yurii Rashkovskii <me@yrashk.com>
+Date: Mon, 5 Nov 2018 10:40:41 -0800
+Subject: [PATCH] Problem: displaying angle brackets in markdown code blocks
+
+If we escape < > as &lt; and &gt; in code blocks (``` ... ```) then they
+are rendered as such, which is not the intent.
+
+Solution: replace escapings to actual characters
+before handing off markdown to the parser
+---
+ src/doc/plugins.html             | 10 +++++-----
+ src/render/content-renderer.html | 12 ++++++++----
+ 2 files changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/src/doc/plugins.html b/src/doc/plugins.html
+index 94f7264..a4bfb13 100644
+--- a/src/doc/plugins.html
++++ b/src/doc/plugins.html
+@@ -7,11 +7,11 @@
+   A plugin is said to be Instantiatable if it has a `template` element inside:
+ 
+   ```html
+-  <noi-wiki id="plugin-name" plugin>
+-    <template>
++  &lt;noi-wiki id="plugin-name" plugin&gt;
++    &lt;template&gt;
+       ...
+-    </template>
+-  </noi-wiki>
++    &lt;/template&gt;
++  &lt;/noi-wiki&gt;
+   ```
+ 
+   The motivation behind this is to bring valid markup into the document without interpreting
+@@ -20,7 +20,7 @@
+   Plugin's template may also contain sub-wikis (defined in their entirety or by reference ^[1]^) that `noi-instantiate`
+   will recursively instantiate.
+   
+-  ^[1]^: `<noi-wiki src="#..."></noi-wiki>`
++  ^[1]^: `&lt;noi-wiki src="#..."&gt;&lt;/noi-wiki&gt;`
+ 
+   ## Non-instantiable plugins
+ 
+diff --git a/src/render/content-renderer.html b/src/render/content-renderer.html
+index 61f4176..a322a69 100644
+--- a/src/render/content-renderer.html
++++ b/src/render/content-renderer.html
+@@ -25,18 +25,22 @@
+     }
+ 
+     contentType['text/markdown'] = node => {
++      var str
+       if (typeof node === 'string') {
+-        return markdown.render(node)
++        str = node
+       }
+       if (node instanceof Node) {
+         const template = node.querySelector('template')
+         if (template == null) {
+-          return markdown.render(node.innerHTML)
++          str = node.textContent
+         } else {
+-          return markdown.render(template.innerHTML)
++          str = node.content.textContent
+         }
+       }
+-      throw new Error(`${node} is neither a string nor a Node`)
++      if (typeof str !== 'string') {
++        throw new Error(`${node} is neither a string nor a Node`)
++      }
++      return markdown.render(str.replace(/&lt;/g, '<').replace(/&gt;/g, '>'))
+     }
+ 
+     contentType['text/x.html-source'] = node => {
+-- 
+2.18.1
+

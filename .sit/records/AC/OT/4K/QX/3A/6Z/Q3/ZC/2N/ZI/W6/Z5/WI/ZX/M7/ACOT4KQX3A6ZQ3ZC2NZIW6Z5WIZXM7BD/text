@@ -1,0 +1,6 @@
+If we escape < > as &lt; and &gt; in code blocks (``` ... ```) then they
+are rendered as such, which is not the intent.
+
+Solution: replace escapings to actual characters
+before handing off markdown to the parser
+
