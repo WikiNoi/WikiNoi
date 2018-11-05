@@ -1,4 +1,5 @@
 <noi-wiki id="noi/render/bulma/wiki-view" content-type="text/x.html-source">
+  <template>
   <script>
     (function () {
       let view = (stylesheet) => class extends HTMLElement {
@@ -60,8 +61,8 @@
                       `
         }
       }
-      document.addEventListener('DOMContentLoaded', function () {
-        let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('style').innerHTML
+      document.onready(function () {
+        let style = document.noi.wiki('noi/render/bulma/style.css').querySelector('template').content.querySelector('style').innerHTML
         let icons = document.noi.wiki('noi/libraries/typicons').querySelector('style').innerHTML
         let blob = new Blob(['noi-bulma-wiki-view { display: block !important }', style, icons], { type: 'text/css' })
         let url = URL.createObjectURL(blob)
@@ -69,4 +70,5 @@
       })
     }).apply(this)
   </script>
+  </template>
 </noi-wiki>

@@ -90,7 +90,7 @@
       return el
     }
     document.noi.wikis = (query) => {
-      return document.querySelectorAll(`noi-wiki${query || ''}`)
+      return document.querySelectorAll(`noi-wiki[id]${query || ''}`)
     }
 
     document.noi.getHTMLBlob = () => {

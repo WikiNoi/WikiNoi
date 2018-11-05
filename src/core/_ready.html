@@ -1,0 +1,13 @@
+<noi-wiki id="noi/core/_ready" content-type="text/x.html-source">
+  <script>
+    (function () {
+      document.onready = (f) => {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', () => f(document))
+        } else {
+          f(document)
+        }
+      }
+    }).call(this)
+  </script>
+</noi-wiki>

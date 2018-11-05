@@ -1,0 +1,34 @@
+<noi-wiki id="noi/core/noi-instantiate" title="noi-instantiate custom element" content-type="text/html">
+  <noi-wiki id="noi/core/noi-instantiate/source" title="noi-instantiate source code" content-type="text/x.html-source">
+  <script>
+    class NoiInstantiate extends HTMLElement {
+      connectedCallback () {
+        const wiki = document.noi.wiki(this.getAttribute('src').slice(1))
+        this._instantiate(wiki)
+      }
+      _instantiate (wiki) {
+        if (wiki.hasAttribute('no-instantiation')) {
+          return
+        }
+        if (wiki.hasAttribute('src')) {
+          wiki = document.noi.wiki(wiki.getAttribute('src').slice(1))
+        }
+        const template = wiki.querySelector('template')
+        if (template !== null) {
+          const content = document.importNode(template.content, true)
+          const node = document.createElement('div')
+          node.appendChild(content)
+          this.appendChild(node)
+          for (var subwiki of node.querySelectorAll('noi-wiki')) {
+            this._instantiate(subwiki)
+          }
+        }
+      }
+    }
+
+    document.onready(() =>
+      customElements.define('noi-instantiate', NoiInstantiate)
+    )
+  </script>
+  </noi-wiki>
+</noi-wiki>

@@ -1,0 +1,31 @@
+<noi-wiki id="noi/doc/plugins" title="Plugins">
+  In order to modularize WikiNoi and simplify installation of third-party code, WikiNoi is built with _plugins_ at its core. 
+  Every plugin is a wiki, potentially with sub-wikis inside of it when plugins are sufficiently complex.
+
+  ## Instantiatable plugins
+
+  A plugin is said to be Instantiatable if it has a `template` element inside:
+
+  ```html
+  <noi-wiki id="plugin-name" plugin>
+    <template>
+      ...
+    </template>
+  </noi-wiki>
+  ```
+
+  The motivation behind this is to bring valid markup into the document without interpreting
+  it until the plugin is activated with [[noi-instantiate|noi/core/noi-instantiate]].
+
+  Plugin's template may also contain sub-wikis (defined in their entirety or by reference ^[1]^) that `noi-instantiate`
+  will recursively instantiate.
+  
+  ^[1]^: `<noi-wiki src="#..."></noi-wiki>`
+
+  ## Non-instantiable plugins
+
+  Plugins that don't use `template` enveloping are interpreted by the browser immediately,
+  leaving user with no choice. This is typically used for the core plugin and other plugins
+  that should be mandatory.
+
+</noi-wiki>
