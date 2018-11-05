@@ -2,7 +2,8 @@
   <noi-wiki id="noi/core/noi-instantiate/source" title="noi-instantiate source code" content-type="text/x.html-source">
   <script>
     class NoiInstantiate extends HTMLElement {
-      connectedCallback () {
+      constructor () {
+        super()
         const wiki = document.noi.wiki(this.getAttribute('src').slice(1))
         this._instantiate(wiki)
       }
