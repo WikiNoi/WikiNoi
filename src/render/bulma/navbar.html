@@ -1,4 +1,5 @@
 <noi-wiki id="noi/render/bulma/navbar" content-type="text/x.html-source">
+  <template>
   <script>
     class BulmaNavbar extends HTMLElement {
       constructor () {
@@ -77,8 +78,9 @@
             `
       }
     }
-    document.addEventListener('DOMContentLoaded', function () {
+    document.onready(function () {
       customElements.define('noi-bulma-navbar', BulmaNavbar)
     })
   </script>
+  </template>
 </noi-wiki>
