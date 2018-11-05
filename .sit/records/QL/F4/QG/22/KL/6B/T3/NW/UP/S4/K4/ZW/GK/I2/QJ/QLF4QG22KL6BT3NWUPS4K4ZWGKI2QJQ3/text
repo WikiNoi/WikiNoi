@@ -1,0 +1,9 @@
+This inhibits our ability to ship extended or third-party functionality
+independently as well as turn certain features on and off in a uniform
+way.
+
+Solution: designate a simple "plugin" mechanism
+
+This is rather a draft, but it (hopefully) gets this idea out of the
+door.
+
